@@ -147,7 +147,7 @@ unsigned int Sieve::getCount()
 {
 	if (computeToCalled)
 	{
-		return unsigned int(primes.size());
+		return (unsigned int)(primes.size());
 	}
 	else
 	{
