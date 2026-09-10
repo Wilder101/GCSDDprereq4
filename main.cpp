@@ -42,8 +42,22 @@ int main()
 			cout << endl << "Primes up to " << number << " are as follows:" << endl;
 			mySieve.computeTo(number);
 			mySieve.reportResults();
-			cout << "% of primes = " << 100 * mySieve.getCount() / mySieve.getMax() 
-				 << endl << endl;
+
+			// getMax() returns 0 when no legal call to computeTo has been made,
+			//   which happens here whenever n is 1. Dividing by it is undefined
+			//   behaviour: x86 traps and the program dies, ARM quietly yields
+			//   zero. Only report a percentage when there is one to report.
+			unsigned int maxN = mySieve.getMax();
+
+			if (maxN > 0)
+			{
+				cout << "% of primes = " << 100 * mySieve.getCount() / maxN
+					 << endl << endl;
+			}
+			else
+			{
+				cout << endl;
+			}
 		}
 	}
 

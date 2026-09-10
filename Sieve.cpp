@@ -40,18 +40,20 @@ void Sieve::computeTo(unsigned int n)
 {
 	// Local variables
 	list<unsigned int> consecutiveInts;
-	lastValueOfN = n;
 
 	// Check for illegal argument
 	if (n < 2)
 	{
-		cout << "IllegalStateException: no legal call has been made yet to the "
-			<< "computeTo method." << endl;
+		// lastValueOfN is deliberately left alone here. A rejected call is not
+		//   "the last time computeTo was called" for reporting purposes, so any
+		//   earlier legal result stays intact.
+		cout << "IllegalArgumentException: n must be 2 or greater." << endl;
 	}
 	else    // n >= 2; valid input
 	{
 		// Valid call to method
 		computeToCalled = true;
+		lastValueOfN = n;
 		 
 		// Clear primes queue
 		primes.clear(); 
@@ -62,8 +64,12 @@ void Sieve::computeTo(unsigned int n)
 			consecutiveInts.push_back(i);
 		}
 
-		// Set-up Sieve of Eratosthenes
-		vector<bool> isPrime(n + 1, true);
+		// Set-up Sieve of Eratosthenes.
+		// Widen before adding one: n is unsigned, so n + 1 wraps to zero at
+		//   UINT_MAX, which sizes this vector at zero and turns the two writes
+		//   below into out-of-bounds writes. Entering a negative number at the
+		//   prompt reaches exactly that value, because cin >> unsigned wraps it.
+		vector<bool> isPrime(static_cast<size_t>(n) + 1, true);
 		isPrime[0] = false;
 		isPrime[1] = false;
 
@@ -101,7 +107,7 @@ void Sieve::reportResults()
 	{
 		unsigned int returnNow = 0;
 
-		for (const int& element : primes) 
+		for (const unsigned int& element : primes) 
 		{
 			cout << element << " ";
 			returnNow++;
