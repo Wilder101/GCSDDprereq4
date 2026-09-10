@@ -26,6 +26,9 @@ class Sieve
 	Sieve();
 	~Sieve();
 
+	// Largest n computeTo accepts; the numbers queue holds n-1 entries
+	static const unsigned int MAX_N = 5000000;
+
 	// Member functions
 	void computeTo(unsigned int n);
 	void reportResults();

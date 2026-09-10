@@ -21,6 +21,7 @@
  */
 
 #include "Sieve.h"
+#include <limits>   // numeric_limits
 
 /**
  main program to exercise the Sieve class
@@ -30,23 +31,38 @@
 int main()
 {
 	Sieve mySieve;
-	unsigned int number = 1;
+	long long number = 1;
 
 	while (number > 0)
 	{
 		cout << "Maximum n to compute (0 to quit)? ";
 		cin >> number;
 
+		// Stop on end of input
+		if (cin.eof())
+		{
+			cout << endl;
+			break;
+		}
+
+		// A negative read into an unsigned wraps to a huge n, so read signed
+		//   and range check before handing it to the sieve
+		if (cin.fail() || number < 0 || number > Sieve::MAX_N)
+		{
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			cout << "Enter a whole number from 0 to " << Sieve::MAX_N << endl << endl;
+			number = 1;
+			continue;
+		}
+
 		if (number > 0)
 		{
 			cout << endl << "Primes up to " << number << " are as follows:" << endl;
-			mySieve.computeTo(number);
+			mySieve.computeTo((unsigned int)number);
 			mySieve.reportResults();
 
-			// getMax() returns 0 when no legal call to computeTo has been made,
-			//   which happens here whenever n is 1. Dividing by it is undefined
-			//   behaviour: x86 traps and the program dies, ARM quietly yields
-			//   zero. Only report a percentage when there is one to report.
+			// getMax() is 0 until a legal call has been made; do not divide by it
 			unsigned int maxN = mySieve.getMax();
 
 			if (maxN > 0)

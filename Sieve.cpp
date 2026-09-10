@@ -15,7 +15,6 @@
 
 #include "Sieve.h"
 #include <cmath>    // sqrt()
-#include <vector>   
 
 // Constructor constructs a Sieve object
 Sieve::Sieve()
@@ -36,27 +35,26 @@ Sieve::~Sieve()
 //   computations must be implemented using this algorithm.The method should 
 //   compute all primes up to and including n. It should throw an 
 //   IllegalArgumentException if n is less than 2.
+//   Capped at MAX_N so the numbers queue cannot exhaust memory.
 void Sieve::computeTo(unsigned int n)
 {
 	// Local variables
 	list<unsigned int> consecutiveInts;
 
 	// Check for illegal argument
-	if (n < 2)
+	if (n < 2 || n > MAX_N)
 	{
-		// lastValueOfN is deliberately left alone here. A rejected call is not
-		//   "the last time computeTo was called" for reporting purposes, so any
-		//   earlier legal result stays intact.
-		cout << "IllegalArgumentException: n must be 2 or greater." << endl;
+		// lastValueOfN is left alone so an earlier legal result still stands
+		cout << "IllegalArgumentException: n must be from 2 to " << MAX_N << endl;
 	}
-	else    // n >= 2; valid input
+	else    // valid input
 	{
 		// Valid call to method
 		computeToCalled = true;
 		lastValueOfN = n;
-		 
+
 		// Clear primes queue
-		primes.clear(); 
+		primes.clear();
 
 		// Fill consecutiveInts queue with consecutive integers from 2 through n inclusive
 		for (unsigned int i = 2; i <= n; i++)
@@ -64,34 +62,38 @@ void Sieve::computeTo(unsigned int n)
 			consecutiveInts.push_back(i);
 		}
 
-		// Set-up Sieve of Eratosthenes.
-		// Widen before adding one: n is unsigned, so n + 1 wraps to zero at
-		//   UINT_MAX, which sizes this vector at zero and turns the two writes
-		//   below into out-of-bounds writes. Entering a negative number at the
-		//   prompt reaches exactly that value, because cin >> unsigned wraps it.
-		vector<bool> isPrime(static_cast<size_t>(n) + 1, true);
-		isPrime[0] = false;
-		isPrime[1] = false;
-
 		// Sieve of Eratosthenes
-		for (unsigned int p = 2; p <= sqrt(n); p++) 
+		unsigned int p = 0;
+		unsigned int limit = (unsigned int)sqrt((double)n);
+
+		do
 		{
-			if (isPrime[p]) 
+			// Next prime is the front of the numbers queue
+			p = consecutiveInts.front();
+			consecutiveInts.pop_front();
+			primes.push_back(p);
+
+			// Eliminate the numbers divisible by p
+			list<unsigned int>::iterator it = consecutiveInts.begin();
+
+			while (it != consecutiveInts.end())
 			{
-				for (unsigned int i = p * p; i <= n; i += p) 
+				if (*it % p == 0)
 				{
-					isPrime[i] = false;
+					it = consecutiveInts.erase(it);
+				}
+				else
+				{
+					++it;
 				}
 			}
-		}
 
-		// Save primes to primes queue
+		} while (p <= limit && !consecutiveInts.empty());
+
+		// Whatever survived the sieve is prime
 		for (unsigned int num : consecutiveInts)
 		{
-			if (isPrime[num]) 
-			{
-				primes.push_back(num);
-			}
+			primes.push_back(num);
 		}
 	}
 
@@ -118,7 +120,11 @@ void Sieve::reportResults()
 				returnNow = 0;
 			}
 		}
-		cout << endl;
+
+		if (returnNow != 0)
+		{
+			cout << endl;
+		}
 	}
 	else
 	{
